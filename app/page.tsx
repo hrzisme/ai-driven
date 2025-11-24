@@ -144,6 +144,13 @@ const cardInfoSteps = [
 // 动画注册
 gsap.registerPlugin(ScrollTrigger, SplitText, ScrollSmoother);
 
+const animationConfig: any = {
+  cardHeight: 600,
+  viewportHeight: 600,
+  scrubIntensity: 0.5,
+  snapDuration: 0.8,
+};
+
 export default function Screen() {
   const [status, setStatus] = useState<number>(0);
   const text_animation_ref = useRef(null);
@@ -158,7 +165,9 @@ export default function Screen() {
   const containerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
   const containerRefTwo = useRef<HTMLDivElement>(null);
+  const pinRef = useRef<HTMLDivElement>(null);
   const cardsRefTwo = useRef<HTMLDivElement[]>([]);
+  const scrollTriggerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // 初始化 Lenis
@@ -176,7 +185,7 @@ export default function Screen() {
     });
 
     // 禁用 GSAP 的默认滚动监听
-    gsap.ticker.lagSmoothing(0);
+    // gsap.ticker.lagSmoothing(0);
 
     const text_data: TextDataType[] = [
       { trigger: text_animation_ref.current, scrub: 1 },
@@ -218,13 +227,13 @@ export default function Screen() {
 
       ballAnimation();
 
+      cardStackAnimationTwo();
+
       logo_data.forEach((item: gsap.TweenVars, index: number) => {
         logoMergAnimation(item);
       });
 
       cardStackAnimation();
-
-      cardStackAnimationTwo();
     });
 
     // 清理函数
@@ -251,7 +260,7 @@ export default function Screen() {
     // 设置初始状态
     gsap.set(split.chars, {
       opacity: 0,
-      color: "red", // 起始颜色
+      color: "#61E4FA", // 起始颜色
     });
 
     // 创建滚动触发动画
@@ -266,7 +275,8 @@ export default function Screen() {
         start: "top 80%", // 当元素顶部到达视口80%时开始
         end: "bottom 20%", // 当元素底部到达视口20%时结束
         toggleActions: "play none none reverse", // 播放一次，反向滚动时反向播放
-        scrub: data.scrub ? 1 : false,
+        // scrub: data.scrub ? 1 : false,
+        scrub: false,
       },
     });
 
@@ -370,49 +380,119 @@ export default function Screen() {
   // 多张卡片层叠动画二
   const cardStackAnimationTwo = () => {
     const cards = cardsRefTwo.current;
-
-    // 为每张卡片创建动画时间轴
-    cards.forEach((card: gsap.TweenTarget, index: number) => {
-      const totalCards = cards.length;
-      const cardHeight = 400; // 卡片高度
-      const overlap = 200; // 卡片重叠距离
-
-      // 计算开始和结束位置
-      const startPosition = index * (cardHeight - overlap);
-      const endPosition = (totalCards - index) * (cardHeight - overlap) + 500;
-
-      // 创建卡片的时间轴
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRefTwo.current,
-          start: `top+=${startPosition} center`,
-          end: `top+=${endPosition} center`,
-          scrub: 1,
-          markers: false, // 设为 true 可查看触发区域
-        },
-      });
-
-      // 卡片展开动画
-      tl.fromTo(
-        card,
-        {
-          y: 0, // 初始层叠位置
-          scale: 0.6, // 初始缩放
-          opacity: 1,
-          zIndex: totalCards - index, // z-index 控制层叠顺序
-        },
-        {
-          y: (totalCards - (index + 1)) * 200, // 移动到正常位置
-          scale: 1, // 正常大小
-          zIndex: totalCards - index, // 展开时在最上层
-          duration: 1,
-        }
-      );
+    // 创建卡片的时间轴
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: containerRefTwo.current,
+        start: `top top`,
+        end: `bottom tottom`,
+        scrub: 0.5,
+        pin: true,
+        markers: false, // 设为 true 可查看触发区域
+      },
     });
+
+    tl.fromTo(
+      cards[1],
+      {
+        y: 40,
+        opacity: 1,
+        scale: 1,
+      },
+      {
+        y: `-=${100}`,
+        opacity: 1,
+        duration: 0.1,
+        scale: 1,
+      },
+      0
+    )
+      .fromTo(
+        cards[2],
+        {
+          y: 80,
+          opacity: 1,
+          scale: 1,
+        },
+        {
+          y: `-=${100}`,
+          opacity: 1,
+          duration: 0.1,
+          scale: 1,
+        },
+        0
+      )
+      .to(
+        cards[1],
+        {
+          y: `-=${300}`,
+          opacity: 1,
+          duration: 0.4,
+          scale: 1,
+        },
+        0.1
+      )
+      .to(
+        cards[2],
+        {
+          y: `-=${300}`,
+          opacity: 1,
+          duration: 0.4,
+          scale: 1,
+        },
+        0.1
+      )
+      .to(
+        cards[0],
+        {
+          scale: 0.9,
+          opacity: 0.8,
+          duration: 0.4,
+        },
+        0.1
+      )
+      .to(
+        cards[2],
+        {
+          y: `-=${100}`,
+          opacity: 1,
+          duration: 0.1,
+          scale: 1,
+        },
+        0.5
+      )
+      .to(
+        cards[1],
+        {
+          scale: 0.9,
+          opacity: 0.8,
+          duration: 0.4,
+        },
+        0.6
+      )
+      .to(
+        cards[2],
+        {
+          y: `-=${300}`,
+          opacity: 1,
+          duration: 0.4,
+          scale: 1,
+        },
+        0.6
+      )
+      .to(
+        cards[0],
+        {
+          scale: 0.8,
+          opacity: 0.6,
+          duration: 0.4,
+        },
+        0.6
+      );
   };
   return (
     <div
-      className="pt-5 bg-[#15191a] overflow-hidden w-full min-w-[1000px] min-h-[8278px] relative"
+      className="pt-5 bg-[#15191a] overflow-hidden w-full min-w-[1000px] min-h-[9778px] relative"
       data-model-id="1:2"
     >
       <Image
@@ -691,22 +771,25 @@ export default function Screen() {
         </div>
       </section>
 
-      <section className="absolute top-[5657px] left-[50%] translate-x-[-50%] w-[1200px]">
-        <h2 className="absolute top-0 left-[310px] [text-shadow:0px_0px_4px_#00000040] bg-[linear-gradient(90deg,rgba(149,156,157,1)_0%,rgba(240,253,255,1)_51%,rgba(149,156,157,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'SF_Pro-Semibold',Helvetica] font-normal text-transparent text-4xl tracking-[0] leading-[normal] whitespace-nowrap">
+      <section
+        ref={containerRefTwo}
+        className="sticky mt-[5607px] pt-[50px] mr-auto ml-auto w-[1000px]"
+      >
+        <h2 className="[text-shadow:0px_0px_4px_#00000040] bg-[linear-gradient(90deg,rgba(149,156,157,1)_0%,rgba(240,253,255,1)_51%,rgba(149,156,157,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'SF_Pro-Semibold',Helvetica] font-normal text-transparent text-4xl tracking-[0] leading-[normal] whitespace-nowrap">
           Institutional Power. Universal Access
         </h2>
 
-        <p className="absolute top-[59px] left-[177px] [font-family:'SF_Pro-Regular',Helvetica] font-normal text-[#a8b0b2] text-[22px] tracking-[0] leading-[33px] whitespace-nowrap">
+        <p className="mt-[18px] [font-family:'SF_Pro-Regular',Helvetica] font-normal text-[#a8b0b2] text-[22px] tracking-[0] leading-[33px] whitespace-nowrap">
           Neberu bridges the gap, offering the same core infrastructure to all
           market participants.
         </p>
 
-        <div ref={containerRefTwo}>
+        <div className="relative mt-20 w-full">
           {cardInfoSteps.map((item, index) => (
             <Card
               ref={addToRefsTwo}
               key={index}
-              className="absolute opacity-1 top-[172px] left-[100px] w-[1000px] h-[400px] rounded-[20px] shadow-[0px_9.66px_38.62px_#61e4fa1f] bg-[linear-gradient(0deg,rgba(21,25,26,1)_0%,rgba(21,25,26,1)_100%),linear-gradient(47deg,rgba(97,228,250,0.03)_0%,rgba(217,217,217,0.03)_100%)] border-0"
+              className={`z-${index} position w-[1000px] h-[400px] rounded-[20px] shadow-[0px_9.66px_38.62px_#61e4fa1f] bg-[linear-gradient(0deg,rgba(21,25,26,1)_0%,rgba(21,25,26,1)_100%),linear-gradient(47deg,rgba(97,228,250,0.03)_0%,rgba(217,217,217,0.03)_100%)] border-0`}
             >
               <CardContent className="p-8 relative h-full">
                 <h3 className="bg-[linear-gradient(90deg,rgba(149,156,157,1)_0%,rgba(240,253,255,1)_51%,rgba(149,156,157,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'SF_Pro-Semibold',Helvetica] font-normal text-transparent text-[28px] tracking-[0] leading-[normal] whitespace-nowrap">
@@ -737,7 +820,8 @@ export default function Screen() {
         </div>
       </section>
 
-      <section className="absolute top-[6477px] bg-[url('https://c.animaapp.com/mi7lh0u1WhAn7g/img/group.png')] bg-size-[80%] left-0 w-[100%] h-[900px] bg-[#15191a]">
+      <section className="absolute top-[7880px] bg-[url('https://c.animaapp.com/mi7lh0u1WhAn7g/img/group.png')] bg-size-[80%] left-0 w-[100%] h-[900px] bg-[#15191a]">
+        {/* <section className=" relative mt-[120px] bg-[url('https://c.animaapp.com/mi7lh0u1WhAn7g/img/group.png')] bg-size-[80%] w-full h-[900px] bg-[#15191a]"> */}
         <h2 className="absolute w-[47.99%] h-[4.78%] top-[8.89%] left-[50%] translate-x-[-50%] [text-shadow:0px_0px_4px_#00000040] bg-[linear-gradient(90deg,rgba(149,156,157,1)_0%,rgba(240,253,255,1)_51%,rgba(149,156,157,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'SF_Pro-Semibold',Helvetica] font-normal text-transparent text-4xl tracking-[0] leading-[normal] whitespace-nowrap">
           More Than a Platform. An Evolving Standard
         </h2>
@@ -760,7 +844,7 @@ export default function Screen() {
         style={{
           willChange: "transform", // 性能优化
         }}
-        className="absolute top-[7497px] left-[50%] translate-x-[-50%] w-[260px] h-[180px]"
+        className="relative mt-[450px] mr-auto ml-auto w-[260px] h-[180px]"
       >
         <Image
           ref={img_logo_l}
@@ -788,13 +872,14 @@ export default function Screen() {
         </div>
       </div>
 
-      <div className="absolute top-[8193px] left-[-190px] w-[1440px] h-[287px] bg-[#61e4fa] rounded-[720px/143.5px] blur-[87.45px]" />
+      <div className="absolute top-[9650px] left-[-190px] w-[1440px] h-[287px] bg-[#61e4fa] rounded-[720px/143.5px] blur-[87.45px]" />
 
-      <div className="absolute top-[8193px] left-[909px] w-[1440px] h-[287px] bg-[#ffeabc] rounded-[720px/143.5px] blur-[87.45px]" />
+      <div className="absolute top-[9650px] left-[909px] w-[1440px] h-[287px] bg-[#ffeabc] rounded-[720px/143.5px] blur-[87.45px]" />
 
-      <div className="absolute top-[8238px] left-0 w-[1440px] h-[218px] bg-[#fefeff] rounded-[720px/109px] blur-[25px]" />
+      <div className="absolute top-[9738px] left-0 w-[1440px] h-[218px] bg-[#fefeff] rounded-[720px/109px] blur-[25px]" />
 
-      <footer className="absolute top-[7829px] left-[50%] translate-x-[-50%] w-[1202px] h-[158px]">
+      <footer className="absolute top-[9280px] left-[50%] translate-x-[-50%] w-[1202px] h-[158px]">
+        {/* <footer className=" mt-[150px] relative mr-auto ml-auto w-[1202px] h-[158px]"> */}
         <div className="absolute top-0 left-0 w-[375px] h-[102px] flex flex-col gap-6">
           <h3 className="w-[234px] h-[22px] [font-family:'SF_Pro-Regular',Helvetica] font-normal text-white text-[22px] tracking-[-0.66px] leading-[22px] whitespace-nowrap">
             Sign up for our newsletter
