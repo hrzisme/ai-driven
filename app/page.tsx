@@ -10,11 +10,11 @@ import { Button } from "@components/ui/button";
 import { Card, CardContent } from "@components/ui/card";
 import { Input } from "@components/ui/input";
 
-import bg_circle from "@assets/img/bg-01.svg";
 import logo from "@assets/img/logo.svg";
 import logo_l from "@assets/img/logo_l.svg";
 import logo_r from "@assets/img/logo_r.svg";
-import ball from "@assets/img/ball.svg";
+import btn01 from "@assets/img/btn-01.png";
+import OrbitalCanvas from "@components/orbital-canvas";
 const navItems = [
   { label: "Home", active: true },
   { label: "Problem", active: false },
@@ -28,33 +28,6 @@ interface TextDataType {
   trigger: any;
   scrub: number;
 }
-
-const glowingOrbs = [
-  {
-    top: "top-[639px]",
-    left: "left-[606px]",
-    shadow:
-      "shadow-[inset_0px_-8px_10px_#e0625cb2,0px_2px_10px_#e0625c80,0px_20px_40px_#e0625c80,0px_-500px_250px_#e0625c]",
-    background:
-      "[background:radial-gradient(50%_50%_at_56%_41%,rgba(22,26,27,1)_87%,rgba(224,98,92,1)_100%)]",
-  },
-  {
-    top: "top-[639px]",
-    left: "left-[732px]",
-    shadow:
-      "shadow-[inset_0px_-8px_10px_#fdee2fb2,0px_2px_10px_#fdee2f80,0px_20px_40px_#fdee2f80,0px_-500px_250px_#fdee2f]",
-    background:
-      "[background:radial-gradient(50%_50%_at_56%_41%,rgba(22,26,27,1)_87%,rgba(253,238,47,1)_100%)]",
-  },
-  {
-    top: "top-[639px]",
-    left: "left-[795px]",
-    shadow:
-      "shadow-[inset_0px_-8px_10px_#5e73f1b2,0px_2px_10px_#5e73f180,0px_20px_40px_#5e73f180,0px_-500px_250px_#939ea0]",
-    background:
-      "[background:radial-gradient(50%_50%_at_56%_41%,rgba(22,26,27,1)_87%,rgba(147,158,160,1)_100%)]",
-  },
-];
 
 const comparisonCards = [
   {
@@ -495,11 +468,6 @@ export default function Screen() {
       className="pt-5 bg-[#15191a] overflow-hidden w-full min-w-[1000px] min-h-[9778px] relative"
       data-model-id="1:2"
     >
-      <Image
-        className="absolute top-0 left-[50%] translate-x-[-50%] w-[1440px] h-[2002px]"
-        alt="Ellipse"
-        src={bg_circle}
-      />
 
       <nav className="flex flex-col items-start gap-2.5 pl-4 pr-4 py-2 absolute top-8 translate-[-50%] left-[50%] h-[60px] rounded-[20px] shadow-[0px_9.66px_38.62px_#61e4fa1f] z-10 bg-[linear-gradient(47deg,rgba(97,228,250,0.06)_0%,rgba(217,217,217,0.06)_100%)] translate-y-[-1rem] animate-fade-in opacity-0">
         <div className="inline-flex items-center gap-8 relative flex-[0_0_auto] mr-[-8.00px]">
@@ -545,49 +513,24 @@ export default function Screen() {
       </header>
 
       <div className="inline-flex items-center gap-6 absolute top-[516px] left-[50%] translate-y-[-1rem] translate-x-[-50%] animate-fade-in opacity-0 [--animation-delay:600ms]">
-        <Button className="inline-flex items-center bg-center bg-no-repeat bg-cover shadow-none  h-25 w-84 bg-[url('@assets/img/btn-01.png')] justify-center gap-4 px-6 py-4 bg-[langth:100%]  hover:bg-[linear-gradient(47deg,rgba(97,228,250,0.1)_0%,rgba(217,217,217,0.1)_100%)] transition-colors">
+        <Button
+          className="inline-flex items-center bg-center bg-no-repeat bg-cover shadow-none h-25 w-84 justify-center gap-4 px-6 py-4 hover:opacity-90 transition-opacity"
+          style={{ backgroundImage: `url(${btn01.src})` }}
+        >
           {/* <span className="relative w-fit [font-family:'SF_Pro-Regular',Helvetica] font-normal text-[#eaf6f8] text-lg tracking-[0] leading-[normal] whitespace-nowrap">
             Explore the Application&nbsp;&nbsp;&gt;
           </span> */}
         </Button>
       </div>
 
-      <img
-        className="absolute top-[658px] left-9 w-[1367px] h-[684px]"
-        alt="Ellipse"
-        src="https://c.animaapp.com/mi7lh0u1WhAn7g/img/ellipse-3.svg"
-      />
 
-      <img
-        className="absolute top-[520px] left-[-91px] w-[1461px] h-[972px]"
-        alt="Ellipse"
-        src="https://c.animaapp.com/mi7lh0u1WhAn7g/img/ellipse-13.svg"
-      />
 
-      <img
-        className="absolute top-[641px] left-[293px] w-12 h-[31px]"
-        alt="Ellipse"
-        src="https://c.animaapp.com/mi7lh0u1WhAn7g/img/ellipse-16.svg"
-      />
 
-      <img
-        className="absolute top-[475px] left-[291px] w-[1161px] h-[896px]"
-        alt="Ellipse"
-        src="https://c.animaapp.com/mi7lh0u1WhAn7g/img/ellipse-14.svg"
-      />
+      {/* 轨道动画 Canvas - 包含中心大星球和轨道小球 */}
+      <div className="absolute top-[40px] left-[50%] -translate-x-1/2 w-[1440px] h-[2600px] pointer-events-none">
+        <OrbitalCanvas />
+      </div>
 
-      {glowingOrbs.map((orb, index) => (
-        <div
-          key={index}
-          className={`absolute ${orb.top} ${orb.left} w-[39px] h-[39px] rounded-[19.5px] ${orb.shadow} ${orb.background}`}
-        />
-      ))}
-
-      <img
-        className="absolute top-0 left-[419px] w-[539px] h-[690px]"
-        alt="Ellipse"
-        src="https://c.animaapp.com/mi7lh0u1WhAn7g/img/ellipse-12.svg"
-      />
 
       <section className="flex flex-col w-[840px] items-center justify-center gap-8 absolute top-[1271px] left-[50%] translate-x-[-50%]">
         <h2 className="relative self-stretch mt-[-1.00px] bg-[linear-gradient(90deg,rgba(149,156,157,1)_0%,rgba(240,253,255,1)_51%,rgba(149,156,157,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'SF_Pro-Semibold',Helvetica] font-normal text-transparent text-4xl text-center tracking-[0] leading-[normal]">
@@ -694,12 +637,6 @@ export default function Screen() {
           ))}
         </div>
 
-        <Image
-          ref={ballRef}
-          className="z-10 absolute top-[150px] left-[50%] translate-x-[-50%] w-[100px] h-[100px]"
-          alt="ball"
-          src={ball}
-        />
 
         <img
           className="absolute top-[562px] left-px w-[1199px] h-[264px]"

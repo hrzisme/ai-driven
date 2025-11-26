@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@styles/globals.css";
-import "@styles/tailwind.css"
-import {SmoothScroll} from "@components/smooth-scroll"
+import "@styles/tailwind.css";
+import { SmoothScroll } from "@components/smooth-scroll";
 
 export const metadata: Metadata = {
   title: 'My Site',
@@ -45,9 +45,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <header>
-    {/* <link href="https://fonts.googleapis.com/css?family=Inter:400" rel="stylesheet" /> */}
-{/* <link href="/styles/tailwind.css" rel="stylesheet" /> */}
-    </header>
+          {/* <link href="https://fonts.googleapis.com/css?family=Inter:400" rel="stylesheet" /> */}
+          {/* <link href="/styles/tailwind.css" rel="stylesheet" /> */}
+        </header>
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>
