@@ -144,6 +144,8 @@ export default function Screen() {
   const problemSectionRef = useRef<HTMLDivElement>(null);
   const problemTitleRef = useRef<HTMLHeadingElement>(null);
   const comparisonCardsRef = useRef<HTMLDivElement[]>([]);
+  const planetBallRef = useRef<HTMLDivElement>(null);
+  const philosophySectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // 初始化 Lenis
@@ -256,6 +258,31 @@ export default function Screen() {
       // Problem section 动画
       problemTitleAnimation();
       comparisonCardsAnimation();
+
+      // 小球下落和内容上移的联动动画
+      if (planetBallRef.current && philosophySectionRef.current) {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: text_animation_ref_t.current,
+            start: "top -10%",  // 文字发光结束后开始
+            end: "top -80%",    // 滚动一段距离后结束
+            scrub: 1,
+            markers: false,
+          },
+        });
+
+        // 小球向下移动
+        tl.to(planetBallRef.current, {
+          y: 350,  // 向下移动到力场凹陷中心
+          ease: "power2.inOut",
+        }, 0);
+
+        // 三栏内容和力场图向上移动
+        tl.to(philosophySectionRef.current, {
+          y: -200,  // 向上移动
+          ease: "power2.inOut",
+        }, 0);
+      }
     });
 
     // 清理函数
@@ -781,7 +808,7 @@ export default function Screen() {
           <br /> Until now.
         </h2>
         {/* 蓝色小球 */}
-        <div className="mt-12 relative w-[120px] h-[120px]">
+        <div ref={planetBallRef} className="mt-12 relative w-[120px] h-[120px] z-20">
           {/* 基础星球 */}
           <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_35%_35%,rgba(102,156,173,0.9)_0%,rgba(31,41,46,1)_55%,rgba(13,17,19,1)_90%)] shadow-[0px_25px_40px_rgba(0,0,0,0.45),inset_-25px_-25px_55px_rgba(0,0,0,0.65)]" />
           {/* 左侧环形渐变高光 */}
@@ -815,7 +842,10 @@ export default function Screen() {
       </section>
 
       <section
-        ref={ballContentRef}
+        ref={(el) => {
+          ballContentRef.current = el;
+          philosophySectionRef.current = el;
+        }}
         className="absolute top-[3474px] left-[50%] translate-x-[-50%] w-[1200px] h-[826px]"
       >
         <div className="absolute top-0 left-0 flex gap-[61px]">
