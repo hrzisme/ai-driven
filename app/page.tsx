@@ -141,6 +141,9 @@ export default function Screen() {
   const pinRef = useRef<HTMLDivElement>(null);
   const cardsRefTwo = useRef<HTMLDivElement[]>([]);
   const scrollTriggerRef = useRef<HTMLDivElement>(null);
+  const problemSectionRef = useRef<HTMLDivElement>(null);
+  const problemTitleRef = useRef<HTMLHeadingElement>(null);
+  const comparisonCardsRef = useRef<HTMLDivElement[]>([]);
 
   useEffect(() => {
     // 初始化 Lenis
@@ -162,13 +165,55 @@ export default function Screen() {
 
     const text_data: TextDataType[] = [
       { trigger: text_animation_ref.current, scrub: 1 },
-      { trigger: text_animation_ref_t.current, scrub: 0 },
     ];
 
     const split: any = [];
     text_data.forEach((item: TextDataType) => {
       split.push(textCharAnimation(item));
     });
+
+    // "The power of AI..." 文字发光动画
+    if (text_animation_ref_t.current) {
+      const splitGlow = new SplitText(text_animation_ref_t.current, {
+        type: "chars",
+        charsClass: "char",
+      });
+
+      // 设置初始状态 - 灰色
+      gsap.set(splitGlow.chars, {
+        color: "rgba(100,110,112,1)",
+        textShadow: "none",
+      });
+
+      // 逐字高亮发光动画
+      gsap.to(splitGlow.chars, {
+        color: "rgba(255,255,255,1)",
+        textShadow: "0 0 30px rgba(97,228,250,0.9), 0 0 60px rgba(97,228,250,0.5)",
+        stagger: 0.08,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: text_animation_ref_t.current,
+          start: "top 80%",
+          end: "top 20%",
+          scrub: 2,
+        },
+      });
+
+      // 发光消退，保持白色 - 更快消退
+      gsap.to(splitGlow.chars, {
+        textShadow: "0 0 0px rgba(97,228,250,0)",
+        stagger: 0.08,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: text_animation_ref_t.current,
+          start: "top 70%",
+          end: "top 10%",
+          scrub: 2,
+        },
+      });
+
+      split.push(splitGlow);
+    }
 
     const ctx = gsap.context(() => {
       const logo_data = [
@@ -207,6 +252,10 @@ export default function Screen() {
       });
 
       cardStackAnimation();
+
+      // Problem section 动画
+      problemTitleAnimation();
+      comparisonCardsAnimation();
     });
 
     // 清理函数
@@ -349,6 +398,140 @@ export default function Screen() {
       cardsRefTwo.current.push(el);
     }
   }, []);
+
+  // 添加 comparison cards 到 ref 数组
+  const addToComparisonCardsRef = useCallback((el: HTMLDivElement | null) => {
+    if (el && !comparisonCardsRef.current.includes(el)) {
+      comparisonCardsRef.current.push(el);
+    }
+  }, []);
+
+  // Problem section 标题浮现动画 - 卡片下移露出标题
+  const problemTitleAnimation = () => {
+    if (!problemTitleRef.current || !comparisonCardsRef.current.length) return;
+
+    // 卡片容器向下移动，露出标题
+    const cardsContainer = comparisonCardsRef.current[0]?.parentElement;
+    if (cardsContainer) {
+      gsap.fromTo(
+        cardsContainer,
+        {
+          y: 0,
+        },
+        {
+          y: 80, // 向下移动80px
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: problemSectionRef.current,
+            start: "top 60%",
+            end: "top 30%",
+            scrub: 1,
+          },
+        }
+      );
+    }
+
+    // 标题第二行浮现
+    const lines = problemTitleRef.current.querySelectorAll('.title-line');
+    lines.forEach((line, index) => {
+      if (index === 1) {
+        // 只对第二行做动画
+        gsap.fromTo(
+          line,
+          {
+            y: 30,
+            opacity: 0.5,
+          },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: problemSectionRef.current,
+              start: "top 60%",
+              end: "top 30%",
+              scrub: 1,
+            },
+          }
+        );
+      }
+    });
+  };
+
+  // Comparison cards 文字动画 - 标题逐字高亮（带反光效果）
+  const comparisonCardsAnimation = () => {
+    const cards = comparisonCardsRef.current;
+
+    cards.forEach((card) => {
+      const title = card.querySelector('.card-title');
+      const description = card.querySelector('.card-description');
+
+      // 标题逐字高亮效果 - 带发光
+      if (title) {
+        const split = new SplitText(title, {
+          type: "chars",
+          charsClass: "char",
+        });
+
+        // 设置初始样式
+        gsap.set(split.chars, {
+          color: "rgba(100,110,112,1)",
+          textShadow: "none",
+        });
+
+        // 逐字高亮动画 - 延长滚动范围
+        gsap.to(split.chars, {
+          color: "rgba(255,255,255,1)",
+          textShadow: "0 0 20px rgba(97,228,250,0.8), 0 0 40px rgba(97,228,250,0.4)",
+          stagger: 0.15, // 增加间隔，让效果更明显
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: card,
+            start: "top 85%",  // 更早开始
+            end: "top 20%",    // 更晚结束，延长动画时间
+            scrub: 2,          // 增加 scrub 值，让动画更平滑
+          },
+        });
+
+        // 高亮后逐渐恢复正常白色（去掉发光）
+        gsap.to(split.chars, {
+          textShadow: "0 0 0px rgba(97,228,250,0)",
+          stagger: 0.15,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: card,
+            start: "top 40%",
+            end: "top 0%",
+            scrub: 2,
+          },
+        });
+      }
+
+      // 描述文字从左往右渐出
+      if (description) {
+        gsap.fromTo(
+          description,
+          {
+            x: -20,
+            opacity: 0,
+          },
+          {
+            x: 0,
+            opacity: 1,
+            duration: 0.8,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 60%",
+              end: "top 30%",
+              scrub: 1,
+            },
+          }
+        );
+      }
+    });
+  };
 
   // 多张卡片层叠动画二
   const cardStackAnimationTwo = () => {
@@ -544,39 +727,51 @@ export default function Screen() {
         </p>
       </section>
 
-      <section className="absolute top-[2102px] left-[50%] translate-x-[-50%] w-[1200px]">
-        <h2 className="bg-[linear-gradient(180deg,rgba(155,155,155,1)_0%,rgba(91,98,100,1)_53%,rgba(91,98,100,0)_90%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'SF_Pro-Semibold',Helvetica] font-normal text-transparent text-[56px] tracking-[0] leading-[normal]">
-          Trading is Run by Machines. <br />
-          The "Brain" is Still a Black Box
+      <section ref={problemSectionRef} className="absolute top-[2102px] left-[50%] translate-x-[-50%] w-[1200px]">
+        <h2 ref={problemTitleRef} className="[font-family:'SF_Pro-Semibold',Helvetica] font-normal text-[56px] tracking-[0] leading-[normal] relative z-0 mb-[-60px]">
+          <span className="title-line block bg-[linear-gradient(90deg,rgba(149,156,157,1)_0%,rgba(240,253,255,1)_51%,rgba(149,156,157,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent]">
+            Trading is Run by Machines.
+          </span>
+          <span className="title-line block bg-[linear-gradient(90deg,rgba(120,130,132,1)_0%,rgba(200,212,214,1)_51%,rgba(120,130,132,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent]">
+            The "Brain" is Still a Black Box
+          </span>
         </h2>
 
-        <div className="flex gap-[60px]">
+        <div className="flex gap-[60px] mt-8 relative z-10">
           {comparisonCards.map((card, index) => (
-            <Card
+            <div
+              ref={addToComparisonCardsRef}
               key={index}
-              className="w-[580px] h-[429px] rounded-[20px] shadow-[0px_9.66px_38.62px_#61e4fa1f] bg-[linear-gradient(0deg,rgba(21,25,26,1)_0%,rgba(21,25,26,1)_100%),linear-gradient(47deg,rgba(97,228,250,0.03)_0%,rgba(217,217,217,0.03)_100%)] border-0"
+              className="comparison-card relative w-[580px] h-[429px] rounded-[20px] shadow-[0px_9.66px_38.62px_#61e4fa1f] bg-[linear-gradient(0deg,rgba(21,25,26,1)_0%,rgba(21,25,26,1)_100%),linear-gradient(47deg,rgba(97,228,250,0.03)_0%,rgba(217,217,217,0.03)_100%)] border border-[rgba(97,228,250,0.1)] overflow-hidden transition-all duration-500 group hover:shadow-[0px_9.66px_60px_#61e4fa40] hover:border-[rgba(97,228,250,0.3)]"
             >
-              <CardContent className="p-8 flex flex-col h-full">
+              {/* Hover 开灯效果 - 光晕层 */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-[radial-gradient(ellipse_at_50%_0%,rgba(97,228,250,0.15)_0%,transparent_70%)]" />
+              {/* 顶部发光线条 - 全宽 */}
+              <div className="absolute top-0 left-0 w-full h-[2px] bg-[linear-gradient(90deg,transparent_0%,#61e4fa_50%,transparent_100%)] opacity-0 group-hover:opacity-80 transition-opacity duration-500" />
+
+              <CardContent className="p-8 flex flex-col h-full justify-between relative z-10">
                 <div className="text-right flex justify-end align-middle">
                   <img
-                    className="w-[222px] h-[195px] mb-6"
+                    className="w-[222px] h-[195px] transition-all duration-500 group-hover:drop-shadow-[0_0_20px_rgba(97,228,250,0.3)]"
                     alt="Frame"
                     src={card.image}
                   />
                 </div>
-                <h3 className="bg-[linear-gradient(90deg,rgba(149,156,157,1)_0%,rgba(240,253,255,1)_51%,rgba(149,156,157,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'SF_Pro-Semibold',Helvetica] font-normal text-transparent text-[28px] tracking-[0] leading-[normal] whitespace-nowrap mb-4">
-                  {card.title}
-                </h3>
-                <p className="[font-family:'SF_Pro-Regular',Helvetica] font-normal text-[#a8b0b2] text-[22px] tracking-[0] leading-[33px]">
-                  {card.description}
-                </p>
+                <div>
+                  <h3 className="card-title [font-family:'SF_Pro-Semibold',Helvetica] font-normal text-[#959c9d] text-[28px] tracking-[0] leading-[normal] whitespace-nowrap mb-4">
+                    {card.title}
+                  </h3>
+                  <p className="card-description [font-family:'SF_Pro-Regular',Helvetica] font-normal text-[#a8b0b2] text-[22px] tracking-[0] leading-[33px] transition-colors duration-500 group-hover:text-[#c0c8ca]">
+                    {card.description}
+                  </p>
+                </div>
               </CardContent>
-            </Card>
+            </div>
           ))}
         </div>
       </section>
 
-      <section className="absolute top-[2925px] left-[50%] translate-x-[-50%] w-210">
+      <section className="absolute top-[2925px] left-[50%] translate-x-[-50%] w-210 flex flex-col items-center">
         <h2
           ref={text_animation_ref_t}
           className="[font-family:'SF_Pro-Semibold',Helvetica] font-normal text-[#a5adae] text-[56px] text-center tracking-[0] leading-[normal]"
@@ -585,6 +780,38 @@ export default function Screen() {
           The infrastructure to trust it is not.
           <br /> Until now.
         </h2>
+        {/* 蓝色小球 */}
+        <div className="mt-12 relative w-[120px] h-[120px]">
+          {/* 基础星球 */}
+          <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_35%_35%,rgba(102,156,173,0.9)_0%,rgba(31,41,46,1)_55%,rgba(13,17,19,1)_90%)] shadow-[0px_25px_40px_rgba(0,0,0,0.45),inset_-25px_-25px_55px_rgba(0,0,0,0.65)]" />
+          {/* 左侧环形渐变高光 */}
+          <svg
+            className="absolute inset-0"
+            viewBox="0 0 120 120"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient id="leftArcGlow" x1="0%" y1="50%" x2="100%" y2="50%">
+                <stop offset="0%" stopColor="#c8fbff" stopOpacity="0.85" />
+                <stop offset="60%" stopColor="#61e4fa" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#61e4fa" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <circle
+              cx="60"
+              cy="60"
+              r="55"
+              fill="none"
+              stroke="url(#leftArcGlow)"
+              strokeWidth="5"
+              strokeLinecap="round"
+              strokeDasharray="190 400"
+              strokeDashoffset="220"
+            />
+          </svg>
+          {/* 底部柔和阴影 */}
+          <div className="absolute -bottom-6 left-[18%] w-[64%] h-8 rounded-full blur-[18px] bg-[radial-gradient(circle,rgba(0,0,0,0.45)_0%,rgba(0,0,0,0)_70%)]" />
+        </div>
       </section>
 
       <section
