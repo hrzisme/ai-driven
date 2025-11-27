@@ -818,24 +818,7 @@ export default function Screen() {
         ref={ballContentRef}
         className="absolute top-[3474px] left-[50%] translate-x-[-50%] w-[1200px] h-[826px]"
       >
-        <div className="absolute top-0 left-0 w-[396px] h-[86px]">
-          <h2 className="absolute text-white top-0 left-0 [text-shadow:0px_0px_4px_#00000040] bg-[linear-gradient(90deg,rgba(149,156,157,1)_0%,rgba(240,253,255,1)_51%,rgba(149,156,157,1)_100%)] [-webkit-background-clip:text] bg-clip-text [font-family:'SF_Pro-Semibold',Helvetica] font-normal  text-4xl text-left">
-            The&nbsp;
-            <span className="[text-shadow:0px_0px_6px_#61e4fa] [font-family:'SF_Pro-Semibold',Helvetica] text-[#61e4fa] text-4xl text-center font-normal">
-              Neberu
-            </span>
-            &nbsp;Philosophy:
-            <br />
-            Delegate, not surrender
-          </h2>
-        </div>
-
-        <p className="absolute top-[100px] left-0 w-[1015px] [font-family:'SF_Pro-Regular',Helvetica] font-normal text-[#a8b0b2] text-[22px] tracking-[0] leading-[33px]">
-          Neberu lets AI handle the heavy lifting—reading markets, tuning
-          parameters, spotting opportunities—while you keep all the guardrails.
-        </p>
-
-        <div className="absolute top-[271px] left-0 flex gap-[61px]">
+        <div className="absolute top-0 left-0 flex gap-[61px]">
           {philosophyColumns.map((column, index) => (
             <div className="flex  gap-[61px]" key={index}>
               <div
@@ -866,7 +849,7 @@ export default function Screen() {
 
 
         <img
-          className="absolute top-[562px] left-px w-[1199px] h-[264px]"
+          className="absolute top-[291px] left-px w-[1199px] h-[264px]"
           alt="Frame"
           src="https://c.animaapp.com/mi7lh0u1WhAn7g/img/frame.svg"
         />
