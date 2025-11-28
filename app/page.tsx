@@ -15,6 +15,7 @@ import logo_l from "@assets/img/logo_l.svg";
 import logo_r from "@assets/img/logo_r.svg";
 import btn01 from "@assets/img/btn-01.png";
 import OrbitalCanvas from "@components/orbital-canvas";
+import HexagonLogoGrid, { HexagonLogoGridRef } from "@components/hexagon-logo-grid";
 const navItems = [
   { label: "Home", active: true },
   { label: "Problem", active: false },
@@ -146,6 +147,8 @@ export default function Screen() {
   const comparisonCardsRef = useRef<HTMLDivElement[]>([]);
   const planetBallRef = useRef<HTMLDivElement>(null);
   const philosophySectionRef = useRef<HTMLDivElement>(null);
+  const hexagonGridRef = useRef<HexagonLogoGridRef>(null);
+  const hexagonSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // 初始化 Lenis
@@ -282,6 +285,158 @@ export default function Screen() {
           y: -150,
           ease: "power2.inOut",
         }, 0);
+      }
+
+      // 六边形网格滚动动画 - 当section顶部进入视口底部时开始，当section顶部离开视口顶部时结束
+      if (hexagonSectionRef.current && hexagonGridRef.current) {
+        const gridElement = hexagonGridRef.current.gridRef.current;
+        const logoElements = hexagonGridRef.current.logoRefs.current;
+        const glowGridElement = hexagonGridRef.current.glowGridRef.current;
+        const glowMaskElement = hexagonGridRef.current.glowMaskRef.current;
+
+        if (gridElement && glowMaskElement && glowGridElement) {
+          // 创建主时间线
+          const hexTl = gsap.timeline({
+            scrollTrigger: {
+              trigger: hexagonSectionRef.current,
+              start: "top bottom", // 当section顶部进入视口底部时开始
+              end: "top top", // 当section顶部离开视口顶部时结束
+              scrub: 2, // 平滑跟随
+            },
+          });
+
+          // 阶段1: 网格从放大状态缩小到正常 (0% - 70%)
+          hexTl.to(gridElement, {
+            scale: 1,
+            duration: 2.1,
+            ease: "power2.out",
+          }, 0);
+
+          // 发光网格也同步缩小
+          hexTl.to(glowGridElement, {
+            scale: 1,
+            duration: 2.1,
+            ease: "power2.out",
+          }, 0);
+
+          // 阶段2: 蜂窝边框发光波浪式从中心向外扩散 (60% - 100%)
+          // 在网格缩小即将完成时开始
+          // 使用环形遮罩实现波浪效果：transparent -> black -> transparent
+          
+          // 波浪开始 - 中心小环 (网格缩小到约85%时开始)
+          hexTl.to(glowMaskElement, {
+            maskImage: "radial-gradient(circle at center, transparent 0%, black 0%, black 10%, transparent 18%)",
+            webkitMaskImage: "radial-gradient(circle at center, transparent 0%, black 0%, black 10%, transparent 18%)",
+            duration: 0.15,
+            ease: "none",
+          }, 1.3);
+
+          // 环向外扩展
+          hexTl.to(glowMaskElement, {
+            maskImage: "radial-gradient(circle at center, transparent 8%, black 13%, black 23%, transparent 32%)",
+            webkitMaskImage: "radial-gradient(circle at center, transparent 8%, black 13%, black 23%, transparent 32%)",
+            duration: 0.15,
+            ease: "none",
+          }, 1.45);
+
+          hexTl.to(glowMaskElement, {
+            maskImage: "radial-gradient(circle at center, transparent 20%, black 25%, black 38%, transparent 48%)",
+            webkitMaskImage: "radial-gradient(circle at center, transparent 20%, black 25%, black 38%, transparent 48%)",
+            duration: 0.15,
+            ease: "none",
+          }, 1.6);
+
+          hexTl.to(glowMaskElement, {
+            maskImage: "radial-gradient(circle at center, transparent 35%, black 40%, black 55%, transparent 65%)",
+            webkitMaskImage: "radial-gradient(circle at center, transparent 35%, black 40%, black 55%, transparent 65%)",
+            duration: 0.15,
+            ease: "none",
+          }, 1.75);
+
+          hexTl.to(glowMaskElement, {
+            maskImage: "radial-gradient(circle at center, transparent 50%, black 55%, black 72%, transparent 82%)",
+            webkitMaskImage: "radial-gradient(circle at center, transparent 50%, black 55%, black 72%, transparent 82%)",
+            duration: 0.15,
+            ease: "none",
+          }, 1.9);
+
+          hexTl.to(glowMaskElement, {
+            maskImage: "radial-gradient(circle at center, transparent 68%, black 73%, black 90%, transparent 100%)",
+            webkitMaskImage: "radial-gradient(circle at center, transparent 68%, black 73%, black 90%, transparent 100%)",
+            duration: 0.15,
+            ease: "none",
+          }, 2.05);
+
+          // 波浪到达边缘并消失
+          hexTl.to(glowMaskElement, {
+            maskImage: "radial-gradient(circle at center, transparent 85%, black 90%, black 105%, transparent 115%)",
+            webkitMaskImage: "radial-gradient(circle at center, transparent 85%, black 90%, black 105%, transparent 115%)",
+            duration: 0.12,
+            ease: "none",
+          }, 2.2);
+
+          // 完全消失
+          hexTl.to(glowMaskElement, {
+            maskImage: "radial-gradient(circle at center, transparent 0%, transparent 100%)",
+            webkitMaskImage: "radial-gradient(circle at center, transparent 0%, transparent 100%)",
+            duration: 0.1,
+            ease: "none",
+          }, 2.32);
+
+          // 阶段3: Logo逐个显现 (50% - 90%)
+          logoElements.forEach((logo, index) => {
+            if (logo) {
+              hexTl.to(logo, {
+                opacity: 1,
+                duration: 0.2,
+                ease: "power2.out",
+              }, 0.5 + index * 0.06);
+            }
+          });
+
+        }
+
+        // 下方文字打字机效果 - 同样的滚动范围
+        if (text_animation_ref.current) {
+          const textElement = text_animation_ref.current as HTMLElement;
+          const text = textElement.innerText;
+          
+          // 创建打字机效果的容器
+          textElement.innerHTML = '';
+          const chars = text.split('');
+          chars.forEach((char) => {
+            const span = document.createElement('span');
+            span.textContent = char;
+            span.style.opacity = '0';
+            textElement.appendChild(span);
+          });
+
+          const charSpans = textElement.querySelectorAll('span');
+          
+          // 创建打字机动画时间线
+          const typingTl = gsap.timeline({
+            scrollTrigger: {
+              trigger: hexagonSectionRef.current,
+              start: "top bottom", // 当section顶部进入视口底部时开始
+              end: "top top", // 当section顶部离开视口顶部时结束
+              scrub: 2,
+            },
+          });
+
+          // 逐字显示：从30%开始，到80%完成 (总范围50%)
+          const startTime = 0.3; // 30%处开始
+          const endTime = 0.8; // 80%处结束
+          const totalDuration = endTime - startTime; // 0.5
+          const charDelay = totalDuration / charSpans.length; // 每个字符的间隔
+          
+          charSpans.forEach((span, index) => {
+            typingTl.to(span, {
+              opacity: 1,
+              duration: 0.01,
+              ease: "none",
+            }, startTime + index * charDelay);
+          });
+        }
       }
     });
 
@@ -675,7 +830,7 @@ export default function Screen() {
   };
   return (
     <div
-      className="pt-5 bg-[#15191a] overflow-hidden w-full min-w-[1000px] min-h-[9578px] relative"
+      className="pt-5 bg-[#15191a] overflow-hidden w-full min-w-[1000px] min-h-[10000px] relative"
       data-model-id="1:2"
     >
 
@@ -842,9 +997,9 @@ export default function Screen() {
       </section>
 
       <section
-        ref={(el: HTMLDivElement | null) => {
-          (ballContentRef as any).current = el;
-          (philosophySectionRef as any).current = el;
+        ref={(el) => {
+          ballContentRef.current = el;
+          philosophySectionRef.current = el;
         }}
         className="absolute top-[3474px] left-[50%] translate-x-[-50%] w-[1200px] h-[826px] z-10"
       >
@@ -885,7 +1040,7 @@ export default function Screen() {
         />
       </section>
 
-      <section className="absolute top-[4180px] left-[50%] translate-x-[-50%] w-[1200px]">
+      <section className="absolute top-[4100px] left-[50%] translate-x-[-50%] w-[1200px]">
         <h2 className="absolute top-0 left-[495px] bg-[linear-gradient(90deg,rgba(149,156,157,1)_0%,rgba(240,253,255,1)_51%,rgba(149,156,157,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'SF_Pro-Semibold',Helvetica] font-normal text-transparent text-4xl text-center tracking-[0] leading-[normal] whitespace-nowrap">
           How It Works
         </h2>
@@ -950,7 +1105,7 @@ export default function Screen() {
 
       <section
         ref={containerRefTwo}
-        className="sticky mt-[5607px] pt-[50px] mr-auto ml-auto w-[1000px]"
+        className="sticky mt-[5327px] pt-[50px] mr-auto ml-auto w-[1000px]"
       >
         <h2 className="[text-shadow:0px_0px_4px_#00000040] bg-[linear-gradient(90deg,rgba(149,156,157,1)_0%,rgba(240,253,255,1)_51%,rgba(149,156,157,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'SF_Pro-Semibold',Helvetica] font-normal text-transparent text-4xl tracking-[0] leading-[normal] whitespace-nowrap">
           Institutional Power. Universal Access
@@ -997,31 +1152,136 @@ export default function Screen() {
         </div>
       </section>
 
-      <section className="absolute top-[7680px] bg-[url('https://c.animaapp.com/mi7lh0u1WhAn7g/img/group.png')] bg-size-[80%] left-0 w-[100%] h-[900px] bg-[#15191a]">
-        {/* <section className=" relative mt-[120px] bg-[url('https://c.animaapp.com/mi7lh0u1WhAn7g/img/group.png')] bg-size-[80%] w-full h-[900px] bg-[#15191a]"> */}
-        <h2 className="absolute w-[47.99%] h-[4.78%] top-[8.89%] left-[50%] translate-x-[-50%] [text-shadow:0px_0px_4px_#00000040] bg-[linear-gradient(90deg,rgba(149,156,157,1)_0%,rgba(240,253,255,1)_51%,rgba(149,156,157,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'SF_Pro-Semibold',Helvetica] font-normal text-transparent text-4xl tracking-[0] leading-[normal] whitespace-nowrap">
+      <section 
+        ref={hexagonSectionRef}
+        className="absolute top-[7600px] left-0 w-full h-[900px] bg-[#15191a] overflow-visible"
+      >
+        {/* 六边形网格背景 + Logo */}
+        <HexagonLogoGrid ref={hexagonGridRef} className="absolute inset-0" />
+
+        {/* 顶部渐变遮罩 - 柔化边界 */}
+        <div className="absolute top-0 left-0 w-full h-[150px] bg-gradient-to-b from-[#15191a] to-transparent z-20 pointer-events-none" />
+        
+        {/* 底部渐变遮罩 - 柔化边界 */}
+        <div className="absolute bottom-0 left-0 w-full h-[150px] bg-gradient-to-t from-[#15191a] to-transparent z-20 pointer-events-none" />
+
+        {/* 标题 */}
+        <h2 className="absolute top-[80px] left-1/2 -translate-x-1/2 [text-shadow:0px_0px_4px_#00000040] bg-[linear-gradient(90deg,rgba(149,156,157,1)_0%,rgba(240,253,255,1)_51%,rgba(149,156,157,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'SF_Pro-Semibold',Helvetica] font-semibold text-4xl tracking-[0] leading-normal text-center z-30">
           More Than a Platform. An Evolving Standard
         </h2>
-        <div className="inline-flex items-center justify-center gap-2.5 p-3 absolute top-[350px] left-[50%] translate-x-[-50%] bg-[#61e4fa] rounded-2xl">
-          <span className="relative w-fit mt-[-1.00px] [font-family:'SF_Pro-Semibold',Helvetica] font-normal text-[#15191a] text-[22px] tracking-[0] leading-[normal] whitespace-nowrap">
+
+        {/* 按钮标签 */}
+        <div className="inline-flex items-center justify-center gap-2.5 px-6 py-3 absolute top-[380px] left-1/2 -translate-x-1/2 bg-[#61e4fa] rounded-2xl z-30">
+          <span className="[font-family:'SF_Pro-Semibold',Helvetica] font-semibold text-[#15191a] text-[22px] tracking-[0] leading-normal whitespace-nowrap">
             The Strategy Hub
           </span>
         </div>
 
+        {/* 描述文字 */}
         <p
           ref={text_animation_ref}
-          className="text-[#a5adae80] absolute w-[56.11%] h-[14.00%] top-[47.11%] left-[21.94%] [font-family:'SF_Pro-Medium',Helvetica] font-medium text-[28px] text-center tracking-[0] leading-[42px]"
+          className="absolute w-[800px] max-w-[90%] top-[480px] left-1/2 -translate-x-1/2 text-[#a5adae] [font-family:'SF_Pro-Medium',Helvetica] font-medium text-[28px] text-center tracking-[0] leading-[42px] z-30"
         >
           A "strategy economy" built on our framework. Define your strategy, run
           it on your capital, or monetize it by letting others subscribe. The
           framework is the trust layer for all participants.
         </p>
       </section>
+
+      {/* New Updates Section */}
+      <section className="absolute top-[8550px] left-[50%] translate-x-[-50%] w-[1200px]">
+        <h2 className="text-center bg-[linear-gradient(90deg,rgba(149,156,157,1)_0%,rgba(240,253,255,1)_51%,rgba(149,156,157,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'SF_Pro-Semibold',Helvetica] font-semibold text-4xl tracking-[0] leading-normal">
+          New Updates
+        </h2>
+
+        <div className="flex gap-6 mt-12 justify-center">
+          {/* Card 1 */}
+          <div className="group relative w-[370px] bg-[#1a1f20] rounded-2xl overflow-hidden border border-[#2a3235] transition-all duration-300">
+            {/* Hover 灯光效果 */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#61e4fa]/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10" />
+            
+            <div className="p-4">
+              <img 
+                src="https://c.animaapp.com/mi7lh0u1WhAn7g/img/frame-1.svg" 
+                alt="Article" 
+                className="w-full h-[160px] object-cover rounded-xl bg-[#0a0d0e]"
+              />
+            </div>
+            <div className="px-4 pb-6">
+              <p className="text-[#61e4fa] text-sm [font-family:'SF_Pro-Regular',Helvetica] mb-2">November 11, 2025</p>
+              <h3 className="text-white text-lg [font-family:'SF_Pro-Medium',Helvetica] leading-relaxed mb-4">
+                x402 Meets BioAgents: AI Scientists Rewiring the Science Economy
+              </h3>
+              <a href="#" className="text-white text-sm [font-family:'SF_Pro-Regular',Helvetica] underline hover:text-[#61e4fa] transition-colors">
+                Read More
+              </a>
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div className="group relative w-[370px] bg-[#1a1f20] rounded-2xl overflow-hidden border border-[#2a3235] transition-all duration-300">
+            {/* Hover 灯光效果 */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#61e4fa]/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10" />
+            
+            <div className="p-4">
+              <img 
+                src="https://c.animaapp.com/mi7lh0u1WhAn7g/img/frame-2.svg" 
+                alt="Article" 
+                className="w-full h-[160px] object-cover rounded-xl bg-[#0a0d0e]"
+              />
+            </div>
+            <div className="px-4 pb-6">
+              <p className="text-[#61e4fa] text-sm [font-family:'SF_Pro-Regular',Helvetica] mb-2">November 4, 2025</p>
+              <h3 className="text-white text-lg [font-family:'SF_Pro-Medium',Helvetica] leading-relaxed mb-4">
+                Bio Monthly: Bio Season 2, x402 Payments x DeSci Agents, eDMT on Rogan, HSC Aging, Stack ...
+              </h3>
+              <a href="#" className="text-white text-sm [font-family:'SF_Pro-Regular',Helvetica] underline hover:text-[#61e4fa] transition-colors">
+                Read More
+              </a>
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div className="group relative w-[370px] bg-[#1a1f20] rounded-2xl overflow-hidden border border-[#2a3235] transition-all duration-300">
+            {/* Hover 灯光效果 */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#61e4fa]/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10" />
+            
+            <div className="p-4">
+              <img 
+                src="https://c.animaapp.com/mi7lh0u1WhAn7g/img/group.png" 
+                alt="Article" 
+                className="w-full h-[160px] object-cover rounded-xl bg-[#0a0d0e]"
+              />
+            </div>
+            <div className="px-4 pb-6">
+              <p className="text-[#61e4fa] text-sm [font-family:'SF_Pro-Regular',Helvetica] mb-2">October 31, 2025</p>
+              <h3 className="text-white text-lg [font-family:'SF_Pro-Medium',Helvetica] leading-relaxed mb-4">
+                Bio Season 2: Building the Future of Permissionless DeSci
+              </h3>
+              <a href="#" className="text-white text-sm [font-family:'SF_Pro-Regular',Helvetica] underline hover:text-[#61e4fa] transition-colors">
+                Read More
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* View All Button */}
+        <div className="flex justify-center mt-10">
+          <button className="flex items-center gap-2 px-6 py-3 border border-[#3a4245] rounded-full text-white [font-family:'SF_Pro-Medium',Helvetica] text-sm hover:bg-white/5 transition-colors">
+            VIEW ALL
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M7 17L17 7M17 7H7M17 7V17"/>
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      {/* Logo 聚拢动效 */}
       <div
         style={{
           willChange: "transform", // 性能优化
         }}
-        className="relative mt-[450px] mr-auto ml-auto w-[260px] h-[180px]"
+        className="absolute top-[9250px] left-[50%] translate-x-[-50%] w-[260px] h-[180px]"
       >
         <Image
           ref={img_logo_l}
@@ -1049,49 +1309,124 @@ export default function Screen() {
         </div>
       </div>
 
-      <div className="absolute top-[9450px] left-[-190px] w-[1440px] h-[287px] bg-[#61e4fa] rounded-[720px/143.5px] blur-[87.45px]" />
+      {/* 底部光效 */}
+      <div className="absolute top-[9850px] left-[-190px] w-[1440px] h-[287px] bg-[#61e4fa] rounded-[720px/143.5px] blur-[87.45px]" />
 
-      <div className="absolute top-[9450px] left-[909px] w-[1440px] h-[287px] bg-[#ffeabc] rounded-[720px/143.5px] blur-[87.45px]" />
+      <div className="absolute top-[9850px] left-[909px] w-[1440px] h-[287px] bg-[#ffeabc] rounded-[720px/143.5px] blur-[87.45px]" />
 
-      <div className="absolute top-[9538px] left-0 w-[1440px] h-[218px] bg-[#fefeff] rounded-[720px/109px] blur-[25px]" />
+      <div className="absolute top-[9938px] left-0 w-[1440px] h-[218px] bg-[#fefeff] rounded-[720px/109px] blur-[25px]" />
 
-      <footer className="absolute top-[9080px] left-[50%] translate-x-[-50%] w-[1202px] h-[158px]">
-        {/* <footer className=" mt-[150px] relative mr-auto ml-auto w-[1202px] h-[158px]"> */}
-        <div className="absolute top-0 left-0 w-[375px] h-[102px] flex flex-col gap-6">
-          <h3 className="w-[234px] h-[22px] [font-family:'SF_Pro-Regular',Helvetica] font-normal text-white text-[22px] tracking-[-0.66px] leading-[22px] whitespace-nowrap">
-            Sign up for our newsletter
-          </h3>
+      <footer className="absolute top-[9550px] left-[50%] translate-x-[-50%] w-[1280px] h-[450px] px-10">
+        {/* 左侧 - Logo、地址、社交 */}
+        <div className="absolute top-0 left-10 flex flex-col gap-8">
+          {/* Logo */}
+          <img
+            src="/neberu.svg"
+            alt="Neberu"
+            className="h-5 w-auto self-start"
+          />
 
-          <div className="w-[375px] h-14 relative">
-            <div className="absolute top-0 left-0 w-[373px] h-14 rounded-[20px] border border-solid border-[#ffffff4c] backdrop-blur-[25px] backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(25px)_brightness(100%)]" />
+          {/* 地址 */}
+          <div className="flex flex-col gap-1 text-white/70 [font-family:'SF_Pro-Regular',Helvetica] text-sm leading-relaxed max-w-[280px]">
+            <span>260 Sheridan Ave</span>
+            <span>Suite 300</span>
+            <span>Palo Alto, CA 94306</span>
+            <span>United States</span>
+          </div>
 
-            <Input
-              placeholder="Your Email"
-              className="absolute top-0 left-0 w-[373px] h-14 bg-transparent border-0 px-5 py-4 text-white placeholder:text-white placeholder:opacity-50 [font-family:'SF_Pro-Regular',Helvetica] font-normal text-base"
-            />
-
-            <Button className="px-5 py-4 h-auto absolute top-1 left-[252px] bg-white shadow-[0px_2px_20px_#ffffff99] hover:bg-white/90 transition-colors rounded-2xl">
-              <span className="relative w-fit mt-[-1.00px] [font-family:'SF_Pro-Regular',Helvetica] font-normal text-black text-base text-center tracking-[0] leading-4 whitespace-nowrap">
-                Subscribe
-              </span>
-            </Button>
+          {/* 社交媒体 */}
+          <div className="flex flex-col gap-4 mt-4">
+            <h4 className="[font-family:'SF_Pro-Medium',Helvetica] font-medium text-white/50 text-xs tracking-wider">
+              SOCIALS
+            </h4>
+            <div className="flex gap-3">
+              <a href="#" className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              </a>
+              <a href="#" className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                </svg>
+              </a>
+              <a href="#" className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+              </a>
+              <a href="#" className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-col w-[216px] items-start gap-4 absolute top-0 left-[984px]">
-          <h3 className="relative self-stretch mt-[-1.00px] [font-family:'SF_Pro-Medium',Helvetica] font-medium text-white text-xs tracking-[0] leading-[normal]">
-            SOCIALS
-          </h3>
+        {/* 右侧 - 链接列 */}
+        <div className="absolute top-0 right-10 flex gap-24">
+          {/* LEGAL */}
+          <div className="flex flex-col gap-4">
+            <h4 className="[font-family:'SF_Pro-Medium',Helvetica] font-medium text-white/50 text-xs tracking-wider">
+              LEGAL
+            </h4>
+            <div className="flex flex-col gap-3">
+              <a href="#" className="[font-family:'SF_Pro-Regular',Helvetica] text-white text-base hover:text-white/70 transition-colors">
+                Terms And Conditions
+              </a>
+              <a href="#" className="[font-family:'SF_Pro-Regular',Helvetica] text-white text-base hover:text-white/70 transition-colors">
+                Privacy Policy
+              </a>
+            </div>
+          </div>
 
-          <img
-            className="relative flex-[0_0_auto]"
-            alt="Frame"
-            src="https://c.animaapp.com/mi7lh0u1WhAn7g/img/frame-2147256338.svg"
-          />
+          {/* RESOURCES */}
+          <div className="flex flex-col gap-4">
+            <h4 className="[font-family:'SF_Pro-Medium',Helvetica] font-medium text-white/50 text-xs tracking-wider">
+              RESOURCES
+            </h4>
+            <div className="flex flex-col gap-3">
+              <a href="#" className="[font-family:'SF_Pro-Regular',Helvetica] text-white text-base hover:text-white/70 transition-colors">
+                Web Agents
+              </a>
+              <a href="#" className="[font-family:'SF_Pro-Regular',Helvetica] text-white text-base hover:text-white/70 transition-colors">
+                User Guide
+              </a>
+              <a href="#" className="[font-family:'SF_Pro-Regular',Helvetica] text-white text-base hover:text-white/70 transition-colors">
+                Forum
+              </a>
+              <a href="#" className="[font-family:'SF_Pro-Regular',Helvetica] text-white text-base hover:text-white/70 transition-colors">
+                Technical Docs
+              </a>
+            </div>
+          </div>
+
+          {/* COMPANY */}
+          <div className="flex flex-col gap-4">
+            <h4 className="[font-family:'SF_Pro-Medium',Helvetica] font-medium text-white/50 text-xs tracking-wider">
+              COMPANY
+            </h4>
+            <div className="flex flex-col gap-3">
+              <a href="#" className="[font-family:'SF_Pro-Regular',Helvetica] text-white text-base hover:text-white/70 transition-colors">
+                Careers
+              </a>
+              <a href="#" className="[font-family:'SF_Pro-Regular',Helvetica] text-white text-base hover:text-white/70 transition-colors">
+                Blog
+              </a>
+              <a href="#" className="[font-family:'SF_Pro-Regular',Helvetica] text-white text-base hover:text-white/70 transition-colors">
+                Brand
+              </a>
+            </div>
+          </div>
         </div>
 
-        <p className="absolute top-[139px] left-0 opacity-50 [font-family:'SF_Pro-Regular',Helvetica] font-normal text-white text-base tracking-[0] leading-[normal] whitespace-nowrap">
-          © 2025 Neberu. All Rights Reserved.
+        {/* 分割线 - 两头渐变消失 */}
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-full max-w-[1200px] h-[1px] bg-gradient-to-r from-transparent via-[#3a4245] to-transparent" />
+
+        {/* 底部版权 */}
+        <p className="absolute bottom-4 left-1/2 -translate-x-1/2 [font-family:'SF_Pro-Regular',Helvetica] font-normal text-[#3a4245] text-sm tracking-[0] leading-[normal] whitespace-nowrap">
+          © 2025 Neberu. All rights reserved.
         </p>
       </footer>
     </div>
