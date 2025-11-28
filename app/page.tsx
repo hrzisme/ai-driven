@@ -675,7 +675,7 @@ export default function Screen() {
   };
   return (
     <div
-      className="pt-5 bg-[#15191a] overflow-hidden w-full min-w-[1000px] min-h-[9778px] relative"
+      className="pt-5 bg-[#15191a] overflow-hidden w-full min-w-[1000px] min-h-[9578px] relative"
       data-model-id="1:2"
     >
 
@@ -842,9 +842,9 @@ export default function Screen() {
       </section>
 
       <section
-        ref={(el) => {
-          ballContentRef.current = el;
-          philosophySectionRef.current = el;
+        ref={(el: HTMLDivElement | null) => {
+          (ballContentRef as any).current = el;
+          (philosophySectionRef as any).current = el;
         }}
         className="absolute top-[3474px] left-[50%] translate-x-[-50%] w-[1200px] h-[826px] z-10"
       >
@@ -885,7 +885,7 @@ export default function Screen() {
         />
       </section>
 
-      <section className="absolute top-[4380px] left-[50%] translate-x-[-50%] w-[1200px]">
+      <section className="absolute top-[4180px] left-[50%] translate-x-[-50%] w-[1200px]">
         <h2 className="absolute top-0 left-[495px] bg-[linear-gradient(90deg,rgba(149,156,157,1)_0%,rgba(240,253,255,1)_51%,rgba(149,156,157,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'SF_Pro-Semibold',Helvetica] font-normal text-transparent text-4xl text-center tracking-[0] leading-[normal] whitespace-nowrap">
           How It Works
         </h2>
@@ -997,7 +997,7 @@ export default function Screen() {
         </div>
       </section>
 
-      <section className="absolute top-[7880px] bg-[url('https://c.animaapp.com/mi7lh0u1WhAn7g/img/group.png')] bg-size-[80%] left-0 w-[100%] h-[900px] bg-[#15191a]">
+      <section className="absolute top-[7680px] bg-[url('https://c.animaapp.com/mi7lh0u1WhAn7g/img/group.png')] bg-size-[80%] left-0 w-[100%] h-[900px] bg-[#15191a]">
         {/* <section className=" relative mt-[120px] bg-[url('https://c.animaapp.com/mi7lh0u1WhAn7g/img/group.png')] bg-size-[80%] w-full h-[900px] bg-[#15191a]"> */}
         <h2 className="absolute w-[47.99%] h-[4.78%] top-[8.89%] left-[50%] translate-x-[-50%] [text-shadow:0px_0px_4px_#00000040] bg-[linear-gradient(90deg,rgba(149,156,157,1)_0%,rgba(240,253,255,1)_51%,rgba(149,156,157,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'SF_Pro-Semibold',Helvetica] font-normal text-transparent text-4xl tracking-[0] leading-[normal] whitespace-nowrap">
           More Than a Platform. An Evolving Standard
@@ -1049,13 +1049,13 @@ export default function Screen() {
         </div>
       </div>
 
-      <div className="absolute top-[9650px] left-[-190px] w-[1440px] h-[287px] bg-[#61e4fa] rounded-[720px/143.5px] blur-[87.45px]" />
+      <div className="absolute top-[9450px] left-[-190px] w-[1440px] h-[287px] bg-[#61e4fa] rounded-[720px/143.5px] blur-[87.45px]" />
 
-      <div className="absolute top-[9650px] left-[909px] w-[1440px] h-[287px] bg-[#ffeabc] rounded-[720px/143.5px] blur-[87.45px]" />
+      <div className="absolute top-[9450px] left-[909px] w-[1440px] h-[287px] bg-[#ffeabc] rounded-[720px/143.5px] blur-[87.45px]" />
 
-      <div className="absolute top-[9738px] left-0 w-[1440px] h-[218px] bg-[#fefeff] rounded-[720px/109px] blur-[25px]" />
+      <div className="absolute top-[9538px] left-0 w-[1440px] h-[218px] bg-[#fefeff] rounded-[720px/109px] blur-[25px]" />
 
-      <footer className="absolute top-[9280px] left-[50%] translate-x-[-50%] w-[1202px] h-[158px]">
+      <footer className="absolute top-[9080px] left-[50%] translate-x-[-50%] w-[1202px] h-[158px]">
         {/* <footer className=" mt-[150px] relative mr-auto ml-auto w-[1202px] h-[158px]"> */}
         <div className="absolute top-0 left-0 w-[375px] h-[102px] flex flex-col gap-6">
           <h3 className="w-[234px] h-[22px] [font-family:'SF_Pro-Regular',Helvetica] font-normal text-white text-[22px] tracking-[-0.66px] leading-[22px] whitespace-nowrap">
