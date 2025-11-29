@@ -17,12 +17,17 @@ import btn01 from "@assets/img/btn-01.png";
 import OrbitalCanvas from "@components/orbital-canvas";
 import HexagonLogoGrid, { HexagonLogoGridRef } from "@components/hexagon-logo-grid";
 const navItems = [
-  { label: "Home", active: true },
-  { label: "Problem", active: false },
-  { label: "Solution", active: false },
-  { label: "Works", active: false },
-  { label: "Participant", active: false },
-  { label: "Ecosystem", active: false },
+  { label: "Forum", external: true },
+  { label: "Docs", external: true },
+  { label: "Blog", external: true },
+  { label: "Careers", external: true },
+];
+
+// 打字机效果的文字列表
+const typingTexts = [
+  "Plan Your Trading",
+  "Execute Your Trading",
+  "Host Your Trading",
 ];
 
 interface TextDataType {
@@ -127,6 +132,10 @@ const animationConfig: any = {
 
 export default function Screen() {
   const [status, setStatus] = useState<number>(0);
+  const [typingText, setTypingText] = useState("");
+  const [textIndex, setTextIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showCursor, setShowCursor] = useState(true);
   const text_animation_ref = useRef(null);
   const text_animation_ref_t = useRef(null);
   const img_logo_l = useRef(null);
@@ -149,6 +158,45 @@ export default function Screen() {
   const philosophySectionRef = useRef<HTMLDivElement>(null);
   const hexagonGridRef = useRef<HexagonLogoGridRef>(null);
   const hexagonSectionRef = useRef<HTMLDivElement>(null);
+
+  // 打字机效果
+  useEffect(() => {
+    const currentText = typingTexts[textIndex];
+    
+    const typeSpeed = isDeleting ? 50 : 100;
+    const pauseTime = isDeleting ? 200 : 2000;
+
+    if (!isDeleting && typingText === currentText) {
+      // 打完了，等待后开始删除
+      const timeout = setTimeout(() => {
+        setIsDeleting(true);
+      }, pauseTime);
+      return () => clearTimeout(timeout);
+    } else if (isDeleting && typingText === "") {
+      // 删完了，切换到下一个文字
+      setIsDeleting(false);
+      setTextIndex((prev) => (prev + 1) % typingTexts.length);
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      if (isDeleting) {
+        setTypingText(currentText.substring(0, typingText.length - 1));
+      } else {
+        setTypingText(currentText.substring(0, typingText.length + 1));
+      }
+    }, typeSpeed);
+
+    return () => clearTimeout(timeout);
+  }, [typingText, textIndex, isDeleting]);
+
+  // 光标闪烁效果
+  useEffect(() => {
+    const cursorInterval = setInterval(() => {
+      setShowCursor((prev) => !prev);
+    }, 530);
+    return () => clearInterval(cursorInterval);
+  }, []);
 
   useEffect(() => {
     // 初始化 Lenis
@@ -834,59 +882,121 @@ export default function Screen() {
       data-model-id="1:2"
     >
 
-      <nav className="flex flex-col items-start gap-2.5 pl-4 pr-4 py-2 absolute top-8 translate-[-50%] left-[50%] h-[60px] rounded-[20px] shadow-[0px_9.66px_38.62px_#61e4fa1f] z-10 bg-[linear-gradient(47deg,rgba(97,228,250,0.06)_0%,rgba(217,217,217,0.06)_100%)] translate-y-[-1rem] animate-fade-in opacity-0">
-        <div className="inline-flex items-center gap-8 relative flex-[0_0_auto] mr-[-8.00px]">
-          <div className="relative w-32 h-6">
-            <Image className="w-32 h-6" alt="Vector" src={logo} />
-            {/* <div className="top-0 left-[58px] w-[70px] [font-family:'Inter',Helvetica] text-white text-[19.9px] absolute font-normal tracking-[0] leading-[normal]">
-              Neberu
-            </div> */}
+      <nav className="flex items-center justify-between px-6 py-3 absolute top-6 left-[50%] translate-x-[-50%] h-[56px] rounded-full border border-[rgba(255,255,255,0.1)] shadow-[0px_4px_24px_rgba(0,0,0,0.2)] z-10 bg-[rgba(21,25,26,0.8)] backdrop-blur-md translate-y-[-1rem] animate-fade-in opacity-0">
+        <div className="inline-flex items-center gap-10">
+          {/* Logo */}
+          <div className="relative w-28 h-5">
+            <Image className="w-28 h-5" alt="Neberu" src={logo} />
           </div>
 
-          <div className="inline-flex items-center gap-6 relative flex-[0_0_auto]">
+          {/* Nav Links */}
+          <div className="inline-flex items-center gap-6">
             {navItems.map((item, index) => (
-              <button
+              <a
                 key={index}
-                className="relative w-fit mt-[-1.00px] [font-family:'SF_Pro-Regular',Helvetica] cursor-pointer font-normal text-base text-center tracking-[0] hover:text-white leading-4 whitespace-nowrap transition-colors hover:text-white"
-                style={{ color: item.active ? "white" : "#a5acad" }}
+                href="#"
+                className="flex items-center gap-1 [font-family:'SF_Pro-Regular',Helvetica] font-normal text-[15px] text-[#a5acad] hover:text-white transition-colors"
               >
                 {item.label}
-              </button>
+                {item.external && (
+                  <svg 
+                    width="10" 
+                    height="10" 
+                    viewBox="0 0 12 12" 
+                    fill="none" 
+                    className="opacity-60"
+                  >
+                    <path 
+                      d="M3.5 2.5H9.5V8.5M9.5 2.5L2.5 9.5" 
+                      stroke="currentColor" 
+                      strokeWidth="1.5" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+              </a>
             ))}
           </div>
 
-          <Button className="px-[18px] py-3.5 h-auto bg-[linear-gradient(90deg,rgba(194,203,205,1)_0%,rgba(237,249,251,1)_50%,rgba(198,208,209,1)_100%)] hover:opacity-90 transition-opacity rounded-2xl">
-            <span className="[font-family:'SF_Pro-Bold',Helvetica] font-bold text-[#15191a] text-base text-center tracking-[0] leading-4 whitespace-nowrap">
-              request Demo
+          {/* Request Demo Button */}
+          <Button className="ml-4 px-5 py-2.5 h-auto bg-white hover:bg-white/90 transition-all rounded-full">
+            <span className="[font-family:'SF_Pro-Semibold',Helvetica] font-semibold text-[#15191a] text-[15px] tracking-[0] leading-none whitespace-nowrap">
+              Request Demo
             </span>
           </Button>
         </div>
       </nav>
 
-      <header className="flex flex-col w-[840px] translate-x-[-50%] items-center gap-8 absolute top-[180px] left-[50%]">
-        <h1 className="relative w-fit mt-[-1.00px] bg-[linear-gradient(90deg,rgba(149,156,157,1)_0%,rgba(240,253,255,1)_51%,rgba(149,156,157,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'SF_Pro-Semibold',Helvetica] font-normal text-transparent text-[56px] text-center tracking-[0] leading-[normal] translate-y-[-1rem] animate-fade-in opacity-0 [--animation-delay:200ms]">
-          AI-Driven Trading. <br />
-          Human-Defined Boundaries.
+      {/* Background Glow Effect - 从下方星球发出的穹顶光晕 */}
+      <div className="absolute top-[-300px] left-[50%] translate-x-[-50%] w-[2800px] h-[1800px] pointer-events-none z-0">
+        {/* 最外层穹顶 - 大范围的柔和光晕，弧线穿过文字 */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_50%_68%,rgba(80,95,105,0.20)_0%,rgba(70,85,95,0.10)_40%,transparent_70%)]" />
+        {/* 中层穹顶 - 增强立体感 */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_45%_45%_at_50%_70%,rgba(95,110,120,0.16)_0%,rgba(80,95,105,0.07)_45%,transparent_65%)]" />
+        {/* 内层穹顶 - 更集中的光照亮文字 */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_38%_38%_at_50%_72%,rgba(110,125,135,0.14)_0%,transparent_55%)]" />
+      </div>
+
+      <header className="flex flex-col w-[840px] translate-x-[-50%] items-center gap-6 absolute top-[200px] left-[50%] z-10">
+        
+        {/* Main Title with Typewriter Effect */}
+        <h1 className="relative w-fit text-center translate-y-[-1rem] animate-fade-in opacity-0 [--animation-delay:200ms]">
+          <span 
+            className="block [font-family:'SF_Pro-Semibold',Helvetica] font-semibold text-[60px] bg-[linear-gradient(90deg,rgba(120,130,135,1)_0%,rgba(255,255,255,1)_50%,rgba(120,130,135,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] leading-tight mb-1"
+            style={{
+              filter: 'drop-shadow(0 0 30px rgba(255,255,255,0.12))',
+            }}
+          >
+            Let AI
+          </span>
+          <span 
+            className="block [font-family:'SF_Pro-Semibold',Helvetica] font-semibold text-[60px] text-[#61e4fa] leading-tight h-[75px]"
+            style={{
+              textShadow: '0 0 30px rgba(97,228,250,0.25), 0 0 60px rgba(97,228,250,0.15)',
+            }}
+          >
+            {typingText}
+            <span 
+              className={`inline-block w-[3px] h-[52px] bg-[#61e4fa] ml-1 align-middle transition-opacity duration-100 ${showCursor ? 'opacity-100' : 'opacity-0'}`}
+              style={{
+                boxShadow: '0 0 8px rgba(97,228,250,0.6)',
+              }}
+            />
+          </span>
         </h1>
 
-        <p className="relative self-stretch [font-family:'SF_Pro-Regular',Helvetica] font-normal text-[#a8b0b2] text-xl text-center tracking-[0] leading-[30px] translate-y-[-1rem] animate-fade-in opacity-0 [--animation-delay:400ms]">
-          Neberu is the institutional-grade framework for automated trading. We
-          delegate complex decision-making to AI, while ensuring every action is
-          executed within a controllable, verifiable, and fully-auditable
-          ecosystem.
+        {/* Description */}
+        <p className="relative max-w-[620px] [font-family:'SF_Pro-Regular',Helvetica] font-normal text-[#9aa0a2] text-[18px] text-center tracking-[0] leading-[28px] translate-y-[-1rem] animate-fade-in opacity-0 [--animation-delay:400ms]">
+          An agentic trading OS that manages every stage of the trading lifecycle — from data to execution.
         </p>
-      </header>
 
-      <div className="inline-flex items-center gap-6 absolute top-[516px] left-[50%] translate-y-[-1rem] translate-x-[-50%] animate-fade-in opacity-0 [--animation-delay:600ms]">
-        <Button
-          className="inline-flex items-center bg-center bg-no-repeat bg-cover shadow-none h-25 w-84 justify-center gap-4 px-6 py-4 hover:opacity-90 transition-opacity"
-          style={{ backgroundImage: `url(${btn01.src})` }}
-        >
-          {/* <span className="relative w-fit [font-family:'SF_Pro-Regular',Helvetica] font-normal text-[#eaf6f8] text-lg tracking-[0] leading-[normal] whitespace-nowrap">
-            Explore the Application&nbsp;&nbsp;&gt;
-          </span> */}
-        </Button>
-      </div>
+        {/* CTA Button */}
+        <div className="translate-y-[-1rem] animate-fade-in opacity-0 [--animation-delay:600ms] mt-4">
+          <Button
+            className="group inline-flex items-center gap-2 px-7 py-4 h-auto bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.12)] hover:border-[rgba(255,255,255,0.25)] hover:bg-[rgba(255,255,255,0.06)] transition-all rounded-2xl backdrop-blur-sm"
+          >
+            <span className="[font-family:'SF_Pro-Regular',Helvetica] font-normal text-[#c8cdcf] text-[16px] tracking-[0] leading-none whitespace-nowrap">
+              Explore the Application
+            </span>
+            <svg 
+              width="14" 
+              height="14" 
+              viewBox="0 0 16 16" 
+              fill="none" 
+              className="text-[#c8cdcf] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+            >
+              <path 
+                d="M4.5 3.5H12.5V11.5M12.5 3.5L3.5 12.5" 
+                stroke="currentColor" 
+                strokeWidth="1.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              />
+            </svg>
+          </Button>
+        </div>
+      </header>
 
 
 
